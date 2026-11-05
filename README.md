@@ -4,7 +4,7 @@ An independent replication of [Sparks of Weight-Space Programming](https://rikiy
 (Takehi, Teoh, Zhang & Khattab, MIT, November 2026), built on the authors' public logs
 ([RikiyaT/lm_understand-logs](https://github.com/RikiyaT/lm_understand-logs)).
 
-By Shapor Naghibzadeh. The analysis was run with Claude (Anthropic) as the agent; GPT-6 Astra was run through the
+By [shapor](https://shapor.com). The analysis was run with Claude (Anthropic) as the agent; GPT-6 Astra was run through the
 Codex CLI. The write-up with charts is [`site/index.html`](site/index.html): one self-contained file, so open it in
 a browser.
 
