@@ -48,7 +48,7 @@ footer{margin-top:48px;font-size:13px;color:var(--muted)}
 <body>
 <main>
 <h1>We re-ran “Sparks of Weight-Space Programming”</h1>
-<p class="sub">An independent replication of the experiments in <a href="https://rikiyat.github.io/blog/weight-space-programming/">Takehi, Teoh, Zhang &amp; Khattab (2026)</a>, using their released logs and weights.<br>By <a href="https://shapor.com"><b>shapor</b></a> · November 2026 · <a href="https://github.com/shapor/weight-space-replication">code, prompts and every model answer</a></p>
+<p class="sub">An independent replication of the experiments in <a href="https://rikiyat.github.io/blog/weight-space-programming/">Takehi, Teoh, Zhang &amp; Khattab (2026)</a>, using their released logs and weights.<br>By <a href="https://shapor.com"><b>shapor</b></a> · November 2026 · <a href="https://github.com/shapor/weight-space-experiments">code, prompts and every model answer</a></p>
 
 <div class="tldr">
 <p><b>The headline Qwen result is mostly about finishing, not math.</b> The post says Astra's weight edit took Qwen3.5-0.8B from 7.9% to 48.1% on MATH-500. But in the post's setup the unedited model runs out of tokens on 93% of answers. The edit mainly makes it stop and answer. Turning thinking off does the same with no edit: we measured the unedited model at <b>45.2%</b>, and the edited one at 44.2%.</p>
@@ -141,7 +141,7 @@ footer{margin-top:48px;font-size:13px;color:var(--muted)}
 <li>Astra was run through the Codex CLI with tools off, as in the post. Opus and Fable each ran as a fresh agent with the same prompt.</li>
 <li>One Opus run on the transformer task happened while our machine was heavily overloaded and stopped after about 5 code runs, so treat Opus's score there as a lower bound.</li>
 <li>Qwen: the thinking-off runs used vLLM on all 500 MATH-500 problems, one sample each, graded with math-verify on the last <code>\boxed{}</code> answer, as the post does. Thinking-on runs at the post's 32,768-token limit, with and without a forced answer at the limit, are running now; this page will be updated with them.</li>
-<li>Every script, blind prompt, answer key and model answer is in the <a href="https://github.com/shapor/weight-space-replication">GitHub repo</a>, so anyone can rerun or extend this.</li>
+<li>Every script, blind prompt, answer key and model answer is in the <a href="https://github.com/shapor/weight-space-experiments">GitHub repo</a>, so anyone can rerun or extend this.</li>
 </ul>
 
 <footer><a href="https://shapor.com">shapor</a>, with analysis run by Claude (Anthropic). Credit to the authors for releasing prompts, weights and logs in enough detail to check. Most of what they report holds up.</footer>
