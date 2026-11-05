@@ -1,0 +1,38 @@
+{
+ "52e6b4": {
+  "exp": 1,
+  "truth": "breakout"
+ },
+ "f2a74d": {
+  "exp": 1,
+  "truth": "pong"
+ },
+ "269e0d": {
+  "exp": 1,
+  "truth": "pacman"
+ },
+ "651327": {
+  "exp": 1,
+  "truth": "freeway"
+ },
+ "a6a3a4": {
+  "exp": 1,
+  "truth": "CONTROL breakout cells scrambled"
+ },
+ "0c5c7f": {
+  "exp": 2,
+  "truth": "circle"
+ },
+ "128b2f": {
+  "exp": 2,
+  "truth": "square"
+ },
+ "d23f08": {
+  "exp": 2,
+  "truth": "triangle"
+ },
+ "892f90": {
+  "exp": 2,
+  "truth": "CONTROL circle pixels scrambled"
+ }
+}

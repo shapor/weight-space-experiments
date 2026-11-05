@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Weight-Space Replication</title>
+<style>
+:root{color-scheme:light;--bg:#fcfcfb;--card:#fff;--ink:#0b0b0b;--ink2:#52514e;--muted:#8a8984;--line:#e6e5e0;--grid:#efeee9;
+--s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--good:#008300;--warn:#c98500;--band:#2a78d61a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#1a1a19;--card:#222220;--ink:#f0efec;--ink2:#c3c2b7;--muted:#8f8e86;--line:#353532;--grid:#2c2c2a;
+--s1:#3987e5;--s2:#d95926;--s3:#199e70;--good:#3fae3f;--warn:#e0a020;--band:#3987e526}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#1a1a19;--card:#222220;--ink:#f0efec;--ink2:#c3c2b7;--muted:#8f8e86;--line:#353532;--grid:#2c2c2a;
+--s1:#3987e5;--s2:#d95926;--s3:#199e70;--good:#3fae3f;--warn:#e0a020;--band:#3987e526}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:760px;margin:0 auto;padding:40px 16px 80px}
+h1{font-size:30px;line-height:1.2;margin:0 0 8px;letter-spacing:-.01em}
+h2{font-size:20px;margin:48px 0 6px}
+.sub{color:var(--ink2);margin:0 0 28px}
+a{color:var(--s1)}
+.tldr{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 22px}
+.tldr p{margin:0 0 10px}.tldr p:last-child{margin:0}
+.tldr b{font-weight:650}
+.lede{color:var(--ink2);margin:0 0 16px}
+.fig{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 18px 12px;margin:14px 0}
+.fig svg{display:block;width:100%;height:auto;overflow:visible}
+.cap{font-size:13px;color:var(--muted);margin:8px 0 0}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--ink2);margin:0 0 10px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+svg text{fill:var(--ink2);font-size:12px}
+svg .t1{fill:var(--ink);font-size:13px;font-weight:600}
+svg .val{fill:var(--ink);font-size:12px;font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:14px 0}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.tile .n{font-size:30px;font-weight:700;line-height:1.1}
+.tile .l{font-size:13px;color:var(--ink2)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink2);font-weight:600}
+.v{white-space:nowrap;font-weight:600}
+.ok::before{content:"✓ ";color:var(--good)}
+.mid::before{content:"◐ ";color:var(--warn)}
+.na::before{content:"– ";color:var(--muted)}
+ul{padding-left:20px}li{margin:4px 0}
+footer{margin-top:48px;font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+<h1>We re-ran “Sparks of Weight-Space Programming”</h1>
+<p class="sub">An independent replication of the experiments in <a href="https://rikiyat.github.io/blog/weight-space-programming/">Takehi, Teoh, Zhang &amp; Khattab (2026)</a>, using their released logs and weights.<br>By <b>Shapor Naghibzadeh</b> · November 2026 · <a href="https://github.com/shapor/weight-space-replication">code, prompts and every model answer</a></p>
+
+<div class="tldr">
+<p><b>The headline Qwen result is mostly about finishing, not math.</b> The post says Astra's weight edit took Qwen3.5-0.8B from 7.9% to 48.1% on MATH-500. But in the post's setup the unedited model runs out of tokens on 93% of answers. The edit mainly makes it stop and answer. Turning thinking off does the same with no edit: we measured the unedited model at <b>45.2%</b>, and the edited one at 44.2%.</p>
+<p><b>Everything else we re-ran holds up.</b> The hand-written MinAtar networks, the Go networks and the fixed car policy all came out within a few percent of the post. The car's “1,024 of 1,024 episodes” is one deterministic run repeated, though.</p>
+<p><b>Reading small networks isn't unique to GPT-6 Astra.</b> Given the same prompts blind, Claude Opus and Claude Fable identified the games and the diffusion shapes just as well. Astra clearly stood apart on one task: finding the copying heads inside a transformer.</p>
+</div>
+
+<h2>The key finding: the gain tracks answers that finish</h2>
+<p class="lede">Each dot is one evaluation of Qwen3.5-0.8B on MATH-500. Accuracy rises with the share of answers that finish before the token limit, whatever got them there.</p>
+<div class="fig">
+<div class="legend"><span><i style="background:var(--muted)"></i>Post's runs, thinking on, 32k limit</span><span><i style="background:var(--s1)"></i>Our runs, thinking off, 8k limit</span></div>
+<svg id="finish" viewBox="0 0 700 330" role="img" aria-label="MATH-500 accuracy against share of answers finished"></svg>
+<p class="cap">Every run lands near one line: accuracy rises with the share of answers that finish before the token limit. The post's runs are from its released evaluation files: the unedited model, then Astra's edits after 10, 25 and 50 rounds. The unedited model is right on nearly every answer it does finish; it just rarely finishes.</p>
+</div>
+<p>The post's own numbers show this. Unedited, the model finishes 7% of its answers and scores 7.9%; after Astra's edit it finishes 67% and scores 48.1%. Turning thinking off gets the unedited model to the same place, 68% finished and 45.2% correct, with no edit at all.</p>
+
+
+<h2>1. Blind reading: who can read the weights?</h2>
+<p class="lede">We gave each model only the post's original prompt and weights, renamed to random IDs: no blog post and no answer key. Score is the share of items answered correctly.</p>
+<div class="fig">
+<div class="legend"><span><i style="background:var(--s1)"></i>GPT-6 Astra</span><span><i style="background:var(--s2)"></i>Claude Opus</span><span><i style="background:var(--s3)"></i>Claude Fable</span></div>
+<svg id="blind" viewBox="0 0 700 300" role="img" aria-label="Blind reading scores by model and task"></svg>
+<p class="cap">Games: which MinAtar game each of 4 networks plays (no tools). Shapes: which shape each of 3 diffusion models draws; Astra named the right shapes but drew them as outlines when they are filled. Copy heads: which of 3 transformers was trained on which corpus and in what order (3 items), and which attention heads copy tokens (5 heads, measured ground truth). Code execution was allowed for this task.</p>
+</div>
+<table aria-label="Blind reading scores">
+<tr><th>Task</th><th>Astra</th><th>Opus</th><th>Fable</th></tr>
+<tr><td>Which game (4)</td><td class="v">4/4</td><td class="v">4/4</td><td class="v">4/4</td></tr>
+<tr><td>Which shape (3)</td><td class="v">3/3*</td><td class="v">3/3</td><td class="v">3/3</td></tr>
+<tr><td>Corpus (3)</td><td class="v">3/3</td><td class="v">1/3</td><td class="v">0/3</td></tr>
+<tr><td>Training order (3)</td><td class="v">3/3</td><td class="v">0/3</td><td class="v">2/3</td></tr>
+<tr><td>Copy heads found (5)</td><td class="v">5/5, 0 false</td><td class="v">0/5</td><td class="v">4/5, 1 false</td></tr>
+</table>
+
+<h2>2. Controls: is it reading, or pattern-matching?</h2>
+<p class="lede">We built scrambled versions that keep every weight value but destroy the structure a real reader would rely on.</p>
+<div class="tiles">
+<div class="tile"><div class="n">3 of 3</div><div class="l">models still said “Breakout” after we shuffled the board cells of the Breakout network</div></div>
+<div class="tile"><div class="n">3 of 3</div><div class="l">models correctly rejected a diffusion model whose pixels we had shuffled</div></div>
+</div>
+<p>The Breakout result isn't a failure of the models. The game is identifiable without the board layout: the output layer shows only left and right matter, and exactly 8 input cells carry the paddle. Opus and Fable both noticed the shuffle. But it means part of the game task is counting, not reading a board.</p>
+
+<h2>3. Re-running the released results</h2>
+<p class="lede">How far our re-run landed from each number in the post. The shaded band is ±5%.</p>
+<div class="fig">
+<svg id="repro" viewBox="0 0 700 360" role="img" aria-label="Difference between our re-run and the post's numbers"></svg>
+<p class="cap">MinAtar: mean score over 1,000 episodes of the official game. Go: win rate over 400 games against the same-size PPO networks the post released, with our own engine built from the prompt's rules. The post's headline Go opponents weren't released, so those rows aren't here. Go rows outside the band differ by about 2–3 points of win rate, within sampling noise (±2.4 points).</p>
+</div>
+<p>Astra's hand-written Breakout network (no training, no tools) scores about 500 per game; a simple follow-the-ball rule we wrote scores 7.9, and random play 0.6. That result is solid. The PPO networks it's compared with are small and reported as their best seed, so “beats PPO” means “beats this PPO”.</p>
+
+<h2>4. The car: 1,024 episodes, one outcome</h2>
+<div class="fig">
+<svg id="car" viewBox="0 0 700 170" role="img" aria-label="Distinct outcomes across 1,024 episodes"></svg>
+<p class="cap">Each square is a distinct way the episode ended across 1,024 runs. The level and physics are fully deterministic (episodes from different random seeds differ by exactly 0.0).</p>
+</div>
+<p>The edited policy does succeed every time, but every episode is the same 73-step run. “100% over 1,024 episodes” is one success, not 1,024. The edit is also bigger than “3.5% of weights changed” suggests: those weights grew about 25× in size.</p>
+
+<h2>5. Qwen: the edit is exactly as described; the baseline is the weak point</h2>
+<div class="tiles">
+<div class="tile"><div class="n">Rank 1</div><div class="l">The weight diff is one direction removed from 64 columns in two layers, as the post says</div></div>
+<div class="tile"><div class="n">93%</div><div class="l">of the base model's MATH-500 answers hit the 32k-token limit in the post's own logs</div></div>
+<div class="tile"><div class="n">45.2%</div><div class="l">MATH-500 for the <b>unedited</b> model with thinking off, which we measured on all 500 problems. The edited model scores 44.2% in the same setting.</div></div>
+</div>
+<p>The post reports MATH-500 rising from 7.9% to 48.1%. In the post's setup the base model almost never finishes: it keeps second-guessing itself (“Wait…”) until it runs out of tokens. So the gain comes from answers the base model never got to give. Getting a model to stop and answer is a useful fix, and it was done purely by editing weights. But 7.9% is a weak baseline rather than the model's real skill level. We tested the simplest alternative on a GPU: thinking off, the model card's other recommended setting, graded exactly as the post grades. The unedited model scores <b>45.2%</b> and the edited model <b>44.2%</b> (all 500 problems, one sample each, about ±2.2 points). So turning thinking off recovers nearly all of the post's gain without touching the weights, and in that mode the edit adds nothing. The authors' own evaluation code defines this setting, with a note that thinking “looped at 0.8B”, but the post reports no non-thinking numbers. The reported runs were also picked from several prompt versions, and the submission rule changed partway through.</p>
+
+<h2>Scorecard</h2>
+<table>
+<tr><th>Claim in the post</th><th>Our verdict</th></tr>
+<tr><td>Identifies which game a policy plays</td><td class="mid">Reproduced. Claude models do it too; works without spatial reading</td></tr>
+<tr><td>Identifies which shape a diffusion model draws</td><td class="mid">Reproduced. Claude models do it too; Astra got the fill wrong</td></tr>
+<tr><td>Finds corpus, order and copy heads in a transformer</td><td class="ok">Reproduced. Astra perfect, clearly ahead</td></tr>
+<tr><td>Fixes a failing car policy (1,024/1,024)</td><td class="mid">Reproduced, overstated: one deterministic trajectory</td></tr>
+<tr><td>Writes MinAtar policies from scratch</td><td class="ok">Reproduced within 5%</td></tr>
+<tr><td>Go networks vs PPO</td><td class="ok">Reproduced against released opponents</td></tr>
+<tr><td>Sycophancy edit</td><td class="na">Not testable: checkpoints not released</td></tr>
+<tr><td>Qwen MATH-500 7.9% → 48.1%</td><td class="mid">Edit verified. Turning thinking off gets the unedited model to 45.2% with no edit</td></tr>
+</table>
+
+<h2>What others have found</h2>
+<p class="lede">Others reached the same conclusion about the Qwen result before us. Our contribution is the controlled measurement: both models, same settings, same grader, all 500 problems.</p>
+<ul>
+<li>The “it's a loop fix, not math” argument, made from the post's own 93% figure: <a href="https://dev.to/alanwest/gpt-6-astra-edited-qwen35-08bs-weights-the-math-500-jump-was-a-loop-fix-2g5a">Alan West on dev.to</a>, <a href="https://dev.to/puneet_nanda_dc25d8b489ad/131072-weights-and-none-of-them-were-a-math-lesson-1b65">“131,072 Weights, and None of Them Were a Math Lesson”</a>, and <a href="https://www.rdworldonline.com/mit-team-says-gpt-6-astra-can-fix-an-ai-model-by-editing-its-weights-critics-say-the-method-was-standard-ml-engineering/">R&amp;D World</a>, which also quotes Goedecke describing the edit as steering, an existing technique, and Honnibal on tool-access differences between experiments.</li>
+<li>Hacker News commenters reported thinking-off scores of 52–55% for the unedited model, without a published evaluation. Our 45.2% under the post's grading points the same way.</li>
+<li>An independent rerun of the edited model with thinking on reports 51.0% on the full set (<a href="https://huggingface.co/ML-Intern-lab/Qwen3.5-0.8B-weight-space-programming">ML-Intern-lab on Hugging Face</a>), consistent with the post's 48.1%.</li>
+<li>The <a href="https://github.com/alan-turing-institute/weights_editing">Alan Turing Institute's replication</a> of the weight-reading and network-writing experiments found Claude Opus close to Astra on reading tasks, matching what we saw, and had Astra write new MinAtar networks: Breakout and Asterix landed near the post's scores, Seaquest at about half.</li>
+</ul>
+
+<h2>How we did it</h2>
+<ul>
+<li>All weights and prompts came from the authors' public logs. We didn't run any of their code; scoring scripts and the Go engine are our own, built from the prompts' rules.</li>
+<li>Astra was run through the Codex CLI with tools off, as in the post. Opus and Fable each ran as a fresh agent with the same prompt.</li>
+<li>One Opus run on the transformer task happened while our machine was heavily overloaded and stopped after about 5 code runs, so treat Opus's score there as a lower bound.</li>
+<li>Qwen: the thinking-off runs used vLLM on all 500 MATH-500 problems, one sample each, graded with math-verify on the last <code>\boxed{}</code> answer, as the post does. Thinking-on runs at the post's 32,768-token limit, with and without a forced answer at the limit, are running now; this page will be updated with them.</li>
+<li>Every script, blind prompt, answer key and model answer is in the <a href="https://github.com/shapor/weight-space-replication">GitHub repo</a>, so anyone can rerun or extend this.</li>
+</ul>
+
+<footer>Shapor Naghibzadeh, with analysis run by Claude (Anthropic). Credit to the authors for releasing prompts, weights and logs in enough detail to check. Most of what they report holds up.</footer>
+</main>
+<script>
+const NS="http://www.w3.org/2000/svg";
+function el(p,tag,a,txt){const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;p.appendChild(e);return e}
+function tip(e,s){el(e,"title",{},s)}
+
+// 1. Blind reading: grouped horizontal bars
+(()=>{const s=document.getElementById("blind");
+const rows=[["Which game","4/4","4/4","4/4",[1,1,1]],["Which shape","3/3","3/3","3/3",[1,1,1]],
+["Corpus + order","6/6","1/6","2/6",[1,1/6,2/6]],["Copy heads","5/5","0/5","4/5 (+1 false)",[1,0,.8]]];
+const x0=150,W=480,bh=14,gap=3,cols=["--s1","--s2","--s3"],names=["Astra","Opus","Fable"];
+[0,.5,1].forEach(v=>{const x=x0+v*W;el(s,"line",{x1:x,x2:x,y1:8,y2:292,stroke:"var(--grid)"});el(s,"text",{x,y:6,"text-anchor":"middle"},v*100+"%")});
+rows.forEach((r,i)=>{const y=22+i*70;el(s,"text",{x:0,y:y+26,class:"t1"},r[0]);
+r[4].forEach((v,j)=>{const yy=y+j*(bh+gap),w=Math.max(v*W,2);
+const b=el(s,"rect",{x:x0,y:yy,width:w,height:bh,rx:4,fill:`var(${cols[j]})`});tip(b,`${names[j]}: ${r[1+j]}`);
+el(s,"text",{x:x0+w+6,y:yy+11,class:"val"},r[1+j])})})})();
+
+// 2. Reproduction: dot plot of % difference
+(()=>{const s=document.getElementById("repro");
+const d=[["MinAtar Breakout",517.4,500.5,""],["MinAtar Seaquest",53.1,50.7,""],["MinAtar Asterix",53.2,53.4,""],
+["Go, 0 tests vs PPO s0",42.6,42.5,"%"],["Go, 0 tests vs PPO s1",26.3,28.2,"%"],["Go, 0 tests vs PPO s2",36.3,33.2,"%"],
+["Go, 50 tests vs PPO s0",74.2,77.2,"%"],["Go, 50 tests vs PPO s1",70.0,70.8,"%"],["Go, 50 tests vs PPO s2",78.5,81.5,"%"],
+["Car success rate",100,100,"%"]];
+const x0=190,W=330,sc=v=>x0+(v+12)/24*W;
+el(s,"rect",{x:sc(-5),y:14,width:sc(5)-sc(-5),height:336,fill:"var(--band)"});
+[-10,-5,0,5,10].forEach(v=>{el(s,"line",{x1:sc(v),x2:sc(v),y1:14,y2:350,stroke:v?"var(--grid)":"var(--muted)"});el(s,"text",{x:sc(v),y:10,"text-anchor":"middle"},(v>0?"+":"")+v+"%")});
+d.forEach((r,i)=>{const y=32+i*33,p=(r[2]/r[1]-1)*100;
+el(s,"text",{x:0,y:y+4},r[0]);
+const c=el(s,"circle",{cx:sc(p),cy:y,r:6,fill:"var(--s1)",stroke:"var(--card)","stroke-width":2});
+tip(c,`${r[0]}: post ${r[1]}${r[3]}, ours ${r[2]}${r[3]} (${p>=0?"+":""}${p.toFixed(1)}%)`);
+el(s,"text",{x:700,y:y+4,"text-anchor":"end",class:"val"},`${r[1]} → ${r[2]}${r[3]}`)})})();
+
+// 3. Car: distinct outcomes as unit squares
+(()=>{const s=document.getElementById("car");
+const rows=[["Original policy","0 / 1,024 succeed",71,"var(--muted)"],["Edited policy","1,024 / 1,024 succeed",1,"var(--s1)"]];
+rows.forEach((r,i)=>{const y=10+i*80;el(s,"text",{x:0,y:y+14,class:"t1"},r[0]);el(s,"text",{x:0,y:y+32},r[1]);
+for(let k=0;k<r[2];k++){const c=k%36,row=Math.floor(k/36);
+const q=el(s,"rect",{x:180+c*13,y:y+row*13,width:11,height:11,rx:2,fill:r[3]});tip(q,`${r[0]}: ${r[2]} distinct outcome${r[2]>1?"s":""}`)}
+el(s,"text",{x:180+(r[2]>1?36*13+4:18),y:y+(r[2]>1?44:10),class:"val","text-anchor":r[2]>1?"end":"start"},r[2]+(r[2]>1?" distinct outcomes":" distinct outcome"))})})();
+
+// 5. Qwen: accuracy vs share of answers finished
+(()=>{const s=document.getElementById("finish");
+const d=[["Post: unedited",7.0,7.9,0],["Post: edit after 10 rounds",12.7,12.3,0],["Post: edit after 25 rounds",13.6,14.1,0],["Post: final edit (50 rounds)",66.9,48.1,0],
+["Ours: unedited, thinking off",67.6,45.2,1],["Ours: edited, thinking off",69.0,44.2,1]];
+const x0=50,y0=290,W=620,H=270,sx=v=>x0+v/100*W,sy=v=>y0-v/60*H;
+[0,20,40,60,80,100].forEach(v=>{el(s,"line",{x1:sx(v),x2:sx(v),y1:y0,y2:y0-H,stroke:"var(--grid)"});el(s,"text",{x:sx(v),y:y0+16,"text-anchor":"middle"},v+"%")});
+[0,20,40,60].forEach(v=>{el(s,"line",{x1:x0,x2:x0+W,y1:sy(v),y2:sy(v),stroke:"var(--grid)"});el(s,"text",{x:x0-8,y:sy(v)+4,"text-anchor":"end"},v+"%")});
+el(s,"text",{x:x0+W/2,y:y0+34,"text-anchor":"middle"},"Answers finished within the token limit");
+el(s,"text",{x:12,y:y0-H/2,"text-anchor":"middle",transform:`rotate(-90 12 ${y0-H/2})`},"MATH-500 accuracy");
+el(s,"line",{x1:sx(0),y1:sy(0),x2:sx(75),y2:sy(75*0.7),stroke:"var(--muted)","stroke-dasharray":"4 4"});
+d.forEach(([n,x,y,o],i)=>{const c=el(s,"circle",{cx:sx(x),cy:sy(y),r:7,fill:o?"var(--s1)":"var(--muted)",stroke:"var(--card)","stroke-width":2});
+tip(c,`${n}: ${x}% finished, ${y}% correct`);
+const lab={0:[12,4,"start"],1:[12,4,"start"],2:[12,-6,"start"],3:[-12,4,"end"],4:[12,-8,"start"],5:[12,14,"start"]}[i];
+el(s,"text",{x:sx(x)+lab[0],y:sy(y)+lab[1],"text-anchor":lab[2]},`${n} (${y}%)`)})})();
+</script>
+</body>
+</html>

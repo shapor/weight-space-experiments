@@ -1,0 +1,10 @@
+budget_0 vs ppo_same_size_lr3e-5_s0: A wins 42.5% ± 2.5 (n=400)
+budget_0 vs ppo_same_size_lr3e-5_s1: A wins 28.2% ± 2.3 (n=400)
+budget_0 vs ppo_same_size_lr3e-5_s2: A wins 33.2% ± 2.4 (n=400)
+budget_0 vs random: A wins 100.0% ± 0.0 (n=200)
+budget_50 vs ppo_same_size_lr3e-5_s0: A wins 77.2% ± 2.1 (n=400)
+budget_50 vs ppo_same_size_lr3e-5_s1: A wins 70.8% ± 2.3 (n=400)
+budget_50 vs ppo_same_size_lr3e-5_s2: A wins 81.5% ± 1.9 (n=400)
+budget_50 vs random: A wins 100.0% ± 0.0 (n=200)
+ppo_same_size_lr3e-5_s0 vs random: A wins 98.0% ± 1.0 (n=200)
+

@@ -1,0 +1,4 @@
+[
+ {"mode": "nothink", "model": "Qwen/Qwen3.5-0.8B", "n": 500, "acc": 0.452, "cut_share": 0.324, "mean_tokens": 3778.83},
+ {"mode": "nothink", "model": "RikiyaT/Qwen3.5-0.8B-weight-space-programming", "n": 500, "acc": 0.442, "cut_share": 0.31, "mean_tokens": 3789}
+]
