@@ -1,0 +1,82 @@
+{
+ "A  author's programmed measurements": {
+  "val": {
+   "ce": 0.794,
+   "acc": 0.743
+  },
+  "test": {
+   "ce": 0.806,
+   "acc": 0.735
+  }
+ },
+ "B0 author's network, random first-layer filters": {
+  "val": {
+   "ce": 1.367,
+   "acc": 0.53
+  },
+  "test": {
+   "ce": 1.358,
+   "acc": 0.532
+  }
+ },
+ "B1 author's network, random first-layer filters": {
+  "val": {
+   "ce": 1.321,
+   "acc": 0.54
+  },
+  "test": {
+   "ce": 1.289,
+   "acc": 0.558
+  }
+ },
+ "B2 author's network, random first-layer filters": {
+  "val": {
+   "ce": 1.347,
+   "acc": 0.519
+  },
+  "test": {
+   "ce": 1.332,
+   "acc": 0.534
+  }
+ },
+ "C0 same architecture, all random weights": {
+  "val": {
+   "ce": 1.56,
+   "acc": 0.439
+  },
+  "test": {
+   "ce": 1.573,
+   "acc": 0.432
+  }
+ },
+ "C1 same architecture, all random weights": {
+  "val": {
+   "ce": 1.513,
+   "acc": 0.454
+  },
+  "test": {
+   "ce": 1.515,
+   "acc": 0.461
+  }
+ },
+ "C2 same architecture, all random weights": {
+  "val": {
+   "ce": 1.534,
+   "acc": 0.448
+  },
+  "test": {
+   "ce": 1.537,
+   "acc": 0.453
+  }
+ },
+ "D  PCA of 32x32 pixels, 151 components": {
+  "val": {
+   "ce": 1.53,
+   "acc": 0.471
+  },
+  "test": {
+   "ce": 1.546,
+   "acc": 0.455
+  }
+ }
+}

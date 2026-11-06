@@ -23,6 +23,30 @@ a browser.
   the games and diffusion shapes as well as Astra did. Astra stood clearly ahead on finding copying heads in a
   transformer.
 
+## Follow-up: a programmed galaxy classifier, with the control it was missing
+
+[weight-space-galaxy10](https://github.com/DaybreakWannaCode/weight-space-galaxy10) (by
+[@hanshananyue](https://x.com/hanshananyue)) has Claude write all 475k weights of a CNN for Galaxy10 DECaLS: 151
+hand-designed morphology measurements feeding a closed-form QDA classifier, 73.7% test accuracy with no gradient step.
+Its report notes that no control had been run, so it was unclear how much came from the programmed measurements and
+how much from the closed-form head, which will score something on almost any features.
+
+We kept the head exactly as the author built it (hyperparameters frozen, fit on train only) and swapped only the 151
+measurements. Our numpy version of the head reproduces the author's score on their measurements, so the comparison is
+like for like.
+
+| Measurements fed to the same head | Test accuracy | Test cross-entropy |
+|---|---|---|
+| The author's programmed measurements | 73.5% | 0.806 |
+| Author's network, random first-layer filters (3 seeds) | 53–56% | 1.29–1.36 |
+| Same architecture, all random weights (3 seeds) | 43–46% | 1.52–1.57 |
+| PCA of 32×32 pixels, 151 components | 45.5% | 1.546 |
+| Class prior / trained CNN (author's baselines) | 14.9% / 82.4% | 2.220 / 0.489 |
+
+Here the control confirms the result. On generic features the head reaches about 45%, and the programmed measurements
+add about 28 points on top. The baselines are generic rather than tuned, and the measurements were chosen with 23
+validation passes, so the true margin is probably somewhat smaller, but it is clearly real.
+
 ## How the experiment is designed, and why
 
 **Blind prompts.** Each model sees only the original prompt and weights, under a random six-character ID, with no
@@ -65,6 +89,7 @@ smaller than the gaps being tested.
 | `results/numbers/` | Raw output of the MinAtar, Go and Kinetix runs |
 | `results/qwen_cpu/` | An early 32-problem GSM8K check on CPU (directional only) |
 | `results/qwen_gpu/` | MATH-500 runs on an NVIDIA L4 with vLLM |
+| `results/galaxy/` | The Galaxy10 control: test and val scores per feature set |
 | `scripts/` | Everything we ran, one file per job; each has its usage at the top |
 
 ## Reproducing
@@ -84,6 +109,9 @@ smaller than the gaps being tested.
    `mlp.down_proj` in layers 15 and 19.
 8. Qwen MATH-500 on a GPU: `scripts/vm_run.sh <base|edit> <gs://bucket/prefix>` on a fresh Ubuntu GPU machine
    installs vLLM and runs `scripts/math500_vllm.py` in each mode, resuming after an interruption.
+
+9. Galaxy10 control: download `Galaxy10_DECals.h5` (link in the galaxy repo's README), clone that repo, then
+   `scripts/galaxy_control.py <h5> <clone>` (needs torch and h5py; no GPU).
 
 ## Not covered
 
